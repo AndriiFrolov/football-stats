@@ -1,4 +1,4 @@
-package com.active.conversion.props;
+package org.football.stats.props;
 
 import java.io.IOException;
 import java.io.InputStream;

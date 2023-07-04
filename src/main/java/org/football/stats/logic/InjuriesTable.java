@@ -1,37 +1,40 @@
 package org.football.stats.logic;
 
-import org.football.stats.dto.StandingsResponse;
+import org.football.stats.dto.InjuriesResponse;
 import org.football.stats.google.Sheets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class LeagueTable {
+public class InjuriesTable {
 
-    public static void write(List<StandingsResponse> standings, String sheet) {
+    public static void write(List<InjuriesResponse> injuriesResponses, String sheet) {
         List<List<Object>> res = new ArrayList<>();
-        List<Object> header = Arrays.asList("Place", "Team", "Points", "Goals", "Conceeded Goals", "Last 5 games");
+        List<Object> header = Arrays.asList("Team", "Player", "Type", "Reason");
         res.add(header);
 
-        if (standings.isEmpty() || standings.get(0).getResponse().isEmpty()) {
+        if (injuriesResponses.isEmpty() || injuriesResponses.get(0).getResponse().isEmpty()) {
             throw new RuntimeException("Standings response is empty!");
         }
-        for (List<StandingsResponse.StandingsEntry> standing : standings.get(0).getResponse().get(0).getLeague().getStandings()) {
-            //Typically it should be just one standing, but for some leagues like MLS - it is 2
-            for (StandingsResponse.StandingsEntry standingsEntry : standing) {
-                List<Object> teamRow = new ArrayList<>();
-                teamRow.add(String.valueOf(standingsEntry.getRank()));
-                teamRow.add(standingsEntry.getTeam().getName());
-                teamRow.add(String.valueOf(standingsEntry.getPoints()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getForGoals()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getAgainst()));
-                teamRow.add(standingsEntry.getForm());
-                res.add(teamRow);
+        List<InjuriesResponse.ResponseItem> injuries = injuriesResponses.stream().flatMap(injuriesResponse -> injuriesResponse.getResponse().stream()).collect(Collectors.toList());
+        Map<String, List<InjuriesResponse.ResponseItem>> groupedMap = injuries.stream()
+                .collect(Collectors.groupingBy(item -> item.getTeam().getName()));
+
+        for (Map.Entry<String, List<InjuriesResponse.ResponseItem>> entry : groupedMap.entrySet()) {
+            Set<String> alreadyProcessedPlayers = new HashSet<>(); //to do not show same players twice
+            for (InjuriesResponse.ResponseItem injury : entry.getValue()) {
+                if (!alreadyProcessedPlayers.contains(injury.getPlayer().getName())) {
+                    List<Object> row = new ArrayList<>();
+                    row.add(injury.getTeam().getName());
+                    row.add(injury.getPlayer().getName());
+                    row.add(injury.getPlayer().getType());
+                    row.add(injury.getPlayer().getReason());
+                    res.add(row);
+                    alreadyProcessedPlayers.add(injury.getPlayer().getName());
+                }
             }
-            res.add(Collections.singletonList("----"));
         }
+
         Sheets.write(res, sheet);
     }
 }

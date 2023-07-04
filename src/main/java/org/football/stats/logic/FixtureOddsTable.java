@@ -1,37 +1,45 @@
 package org.football.stats.logic;
 
+import org.football.stats.data.FixtureOdds;
+import org.football.stats.dto.OddsResponse;
 import org.football.stats.dto.StandingsResponse;
 import org.football.stats.google.Sheets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-public class LeagueTable {
+public class FixtureOddsTable {
 
-    public static void write(List<StandingsResponse> standings, String sheet) {
+    public static void write(List<FixtureOdds> oddsForFixtures, String sheet) {
         List<List<Object>> res = new ArrayList<>();
-        List<Object> header = Arrays.asList("Place", "Team", "Points", "Goals", "Conceeded Goals", "Last 5 games");
-        res.add(header);
+        if (oddsForFixtures.isEmpty()) {
+            throw new RuntimeException("Odds & Fixtures response is empty!");
+        }
 
-        if (standings.isEmpty() || standings.get(0).getResponse().isEmpty()) {
-            throw new RuntimeException("Standings response is empty!");
-        }
-        for (List<StandingsResponse.StandingsEntry> standing : standings.get(0).getResponse().get(0).getLeague().getStandings()) {
-            //Typically it should be just one standing, but for some leagues like MLS - it is 2
-            for (StandingsResponse.StandingsEntry standingsEntry : standing) {
-                List<Object> teamRow = new ArrayList<>();
-                teamRow.add(String.valueOf(standingsEntry.getRank()));
-                teamRow.add(standingsEntry.getTeam().getName());
-                teamRow.add(String.valueOf(standingsEntry.getPoints()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getForGoals()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getAgainst()));
-                teamRow.add(standingsEntry.getForm());
-                res.add(teamRow);
+        Header header = new Header(Arrays.asList("Date", "Home Team", "Away Team"));
+        header.add(oddsForFixtures);
+        res.add(header.getH1());
+        res.add(header.getH2());
+        System.out.println("--------------------------------------");
+        for (FixtureOdds oddsForFixture : oddsForFixtures) {
+            List<Object> row = header.getRowTemplate();
+            row.set(0, oddsForFixture.getDate());
+            row.set(1, oddsForFixture.getTeam1());
+            row.set(2, oddsForFixture.getTeam2());
+
+            System.out.println("Parsing odds for fixture " + oddsForFixture.getTeam1() + " - " + oddsForFixture.getTeam2());
+            for (OddsResponse.Bet bet : oddsForFixture.getBets()) {
+                String betName = bet.getName();
+
+                for (OddsResponse.Value value : bet.getValues()) {
+                    int index = header.getIndexH2(betName, value.getValue());
+                    row.set(index, value.getOdd().replaceAll("'", ""));
+                }
             }
-            res.add(Collections.singletonList("----"));
+
+            res.add(row);
         }
+
         Sheets.write(res, sheet);
+        System.out.println("--------------------------------------");
     }
 }

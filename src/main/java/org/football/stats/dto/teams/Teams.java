@@ -1,4 +1,4 @@
-package org.football.stats.dto;
+package org.football.stats.dto.teams;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;

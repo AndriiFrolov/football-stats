@@ -1,4 +1,4 @@
-package com.active.conversion.props;
+package org.football.stats.props;
 
 public class ResourseReadFailedException extends RuntimeException {
 

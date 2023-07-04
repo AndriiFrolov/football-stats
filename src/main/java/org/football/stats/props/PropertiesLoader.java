@@ -1,7 +1,11 @@
-package com.active.conversion.props;
+package org.football.stats.props;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PropertiesLoader {
 
@@ -21,11 +25,7 @@ public class PropertiesLoader {
         }
     }
 
-    public static void loadSystemProperties() {
-        PropertiesSupplier.loadSystemProperties();
-    }
 
-    public static void loadEnvProperties() {
-        PropertiesSupplier.loadEnvProperties();
-    }
+
+
 }

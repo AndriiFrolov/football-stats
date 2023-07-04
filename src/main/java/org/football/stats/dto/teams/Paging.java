@@ -1,5 +1,5 @@
 
-package org.football.stats.dto;
+package org.football.stats.dto.teams;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

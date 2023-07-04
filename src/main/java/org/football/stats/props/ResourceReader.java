@@ -1,7 +1,4 @@
-package com.active.conversion.props;
-
-
-import com.active.conversion.logging.Log;
+package org.football.stats.props;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +20,6 @@ public class ResourceReader {
             throw new ResourseReadFailedException("Resource not found: " + pathWithinResFolder);
         }
         try (Scanner scanner = new Scanner(resourceStream, StandardCharsets.UTF_8)) {
-            Log.info(String.format("Reading resource: %s", pathWithinResFolder));
             return scanner.useDelimiter("\\A").next();
         }
     }
