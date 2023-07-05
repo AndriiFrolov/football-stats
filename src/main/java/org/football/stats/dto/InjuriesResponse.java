@@ -15,6 +15,11 @@ public class InjuriesResponse implements IResponse{
     private Paging paging;
     private List<ResponseItem> response;
 
+    @Override
+    public Paging getPaging() {
+        return paging;
+    }
+
     @Data
     public static class Parameters {
         private String league;

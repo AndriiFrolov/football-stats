@@ -80,16 +80,16 @@ public class PropertiesSupplier {
     }
 
     private static String get(String key) {
-        //Firstly look to the global properties shared between all threads
-        String globalProperty = globalProperties.getProperty(key, null);
-        if (Objects.nonNull(globalProperty)) {
-            return globalProperty;
-        }
-
         //Then look to the system properties (for current Thread)
         String systemProperty = System.getProperties().getProperty(key, null);
         if (Objects.nonNull(systemProperty)) {
             return systemProperty;
+        }
+
+        //Firstly look to the global properties shared between all threads
+        String globalProperty = globalProperties.getProperty(key, null);
+        if (Objects.nonNull(globalProperty)) {
+            return globalProperty;
         }
 
         //Otherwise look to the Thread properties

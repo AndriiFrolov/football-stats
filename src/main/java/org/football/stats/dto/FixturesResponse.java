@@ -14,6 +14,11 @@ public class FixturesResponse implements IResponse{
     private Paging paging;
     private List<FixtureData> response;
 
+    @Override
+    public Paging getPaging() {
+        return paging;
+    }
+
     @Data
     public static class FixturesParameters {
         private String league;

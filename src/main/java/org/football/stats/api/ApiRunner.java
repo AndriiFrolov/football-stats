@@ -55,7 +55,7 @@ public class ApiRunner {
         if (page != null) {
             queryParams.put("page", page);
         }
-        System.out.println("---------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------");
         System.out.printf("Sending request to %s with params: \n", url);
         printMap(queryParams);
         T response = RestAssured.given()
@@ -63,7 +63,7 @@ public class ApiRunner {
                 .get(url)
                 .as(responseType);
         System.out.printf("%s returned %d pages%n", url, response.getPaging().getTotal());
-        System.out.println("---------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------");
         return response;
     }
 

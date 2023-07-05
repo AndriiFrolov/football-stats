@@ -16,6 +16,11 @@ public class OddsResponse implements IResponse {
     private Paging paging;
     private List<Response> response;
 
+    @Override
+    public Paging getPaging() {
+        return paging;
+    }
+
     @Data
     public static class Parameters {
         private String league;

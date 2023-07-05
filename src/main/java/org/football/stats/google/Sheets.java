@@ -1,6 +1,7 @@
 package org.football.stats.google;
 
 import com.google.api.services.sheets.v4.model.*;
+import org.checkerframework.checker.units.qual.A;
 import org.football.stats.props.PropertiesSupplier;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class Sheets {
     }
 
     public static void write(List<List<Object>> values, String sheet) {
+        clear(sheet);
         try {
 
             com.google.api.services.sheets.v4.Sheets sheetsService = GoogleSheetServiceProvider.getSheetsService();
@@ -49,6 +51,35 @@ public class Sheets {
         }
     }
 
+    public static void empty(String sheet) {
+        int rows = 400;
+        int columns = 400;
+        List<List<Object>> values = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            List<Object> row = new ArrayList<>();
+            for (int j = 0; j < columns; j++) {
+                row.add("");
+            }
+            values.add(row);
+        }
+        write(values, sheet);
+    }
+
+    public static void clear(String sheet) {
+        // Create the clear values request
+        ClearValuesRequest request = new ClearValuesRequest();
+        String spreadsheetId = PropertiesSupplier.getProperty("spreadsheet.id");
+        // Call the Sheets API to clear all values in the sheet
+        com.google.api.services.sheets.v4.Sheets sheetsService = GoogleSheetServiceProvider.getSheetsService();
+        try {
+            com.google.api.services.sheets.v4.Sheets.Spreadsheets.Values.Clear clear = sheetsService.spreadsheets().values().clear(spreadsheetId, sheet, request);
+            ClearValuesResponse execute = clear.execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("Data cleared successfully from sheet " + sheet);
+    }
     public static void mergeCells() {
         // Initialize Sheets client
         com.google.api.services.sheets.v4.Sheets sheetsService = GoogleSheetServiceProvider.getSheetsService();

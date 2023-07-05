@@ -41,7 +41,6 @@ public class Header {
     public void add(List<FixtureOdds> oddsForFixtures) {
         for (FixtureOdds oddsForFixture : oddsForFixtures) {
             for (OddsResponse.Bet bet : oddsForFixture.getBets()) {
-                System.out.println("Bet " + bet.getName() + " has " + bet.getValues().size() + "values");
 
                 String betName = bet.getName();
                 List<String> betValues = allPossibleBetValues.computeIfAbsent(betName, k -> new ArrayList<>());

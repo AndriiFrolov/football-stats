@@ -16,6 +16,11 @@ public class StandingsResponse implements IResponse {
     private Paging paging;
     private List<StandingsData> response;
 
+    @Override
+    public Paging getPaging() {
+        return paging;
+    }
+
     @Data
     public static class StandingsParameters {
         private String league;
