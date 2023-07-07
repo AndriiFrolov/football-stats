@@ -11,8 +11,7 @@ import org.football.stats.dto.FixturesResponse;
 import org.football.stats.dto.InjuriesResponse;
 import org.football.stats.dto.OddsResponse;
 import org.football.stats.dto.StandingsResponse;
-import org.football.stats.google.Sheets;
-import org.football.stats.logic.FixtureOddsTable;
+import org.football.stats.logic.odds.FixtureOddsTable;
 import org.football.stats.logic.InjuriesTable;
 import org.football.stats.logic.LeagueTable;
 import org.football.stats.props.PropertiesLoader;
@@ -38,24 +37,17 @@ public class Main {
 
         saveStandings();
 
-        saveOdds();
+        List<String> extraBetNamesToGenerate = Arrays.asList(
+                "Handicap Result", "Home Team Score a Goal"
+        );
+        saveOdds(extraBetNamesToGenerate);
     }
 
-    private static void saveOdds() {
+    private static void saveOdds(List<String> extraBetNamesToGenerate) {
         List<FixturesResponse> fixtures = ApiRunner.getFixtures(leagueId, season, 15);
         List<OddsResponse> odds = ApiRunner.getOdds(leagueId, season, bookmakerId);
-        List<FixtureOdds> oddsForFixtures = DataHelper.getOddsForFixtures(fixtures, odds, Arrays.asList(
-                "Match Winner",
-//                "Exact Score",
-//                "Goals Over/Under",
-                "Team To Score First",
-                "Double Chance",
-//                "Both Teams Score",
-                "Winning Margin",
-                "First Half Winner",
-//                "Corners 1x2",
-                "Total Goals (3 way)"
-        ));
+
+        List<FixtureOdds> oddsForFixtures = DataHelper.getOddsForFixtures(fixtures, odds, extraBetNamesToGenerate);
         FixtureOddsTable.write(oddsForFixtures, league.toUpperCase() + "_BETS");
     }
 

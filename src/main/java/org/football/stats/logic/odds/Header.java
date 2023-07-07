@@ -1,4 +1,4 @@
-package org.football.stats.logic;
+package org.football.stats.logic.odds;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.football.stats.data.FixtureOdds;
@@ -7,12 +7,28 @@ import org.football.stats.dto.OddsResponse;
 import java.util.*;
 
 public class Header {
-    private List<String> initial;
-
     Map<String, List<String>> allPossibleBetValues = new HashMap<>();
     Map<String, Integer> firstLineHeader = new HashMap<>();
     Map<String, Integer> firstLineHeaderEnd = new HashMap<>();
     Map<Pair<String, String>, Integer> secondLineHeader = new HashMap<>();
+
+    public static final List<OddColumn> columns = Arrays.asList(
+            new OddColumn("Date", "A", 1, false),
+            new OddColumn("Home Team", "B", 1, false),
+            new OddColumn("Away Team", "C", 1, false),
+            new OddColumn("Match Winner", "D", 3, true),
+            new OddColumn("First Half Winner", "H", 3, true),
+            new OddColumn("Double Chance", "L", 3, true),
+            new OddColumn("Both Teams Score", "P", 2, true),
+            new OddColumn("Goals Over/Under", "S", 15, true),
+            new OddColumn("Exact Score", "AI", 26, true)
+    );
+
+    public Header() {
+        for (OddColumn column : columns) {
+            firstLineHeader.put(column.getName(), column.getColumnIdx());
+        }
+    }
 
     public List<Object> getH1() {
         List<Object> rowTemplate = getRowTemplate();
@@ -31,14 +47,9 @@ public class Header {
         return rowTemplate;
     }
 
-    public Header(List<String> initial) {
-        this.initial = initial;
-        for (int i = 0; i < initial.size(); i++) {
-            firstLineHeader.put(initial.get(i), i);
-        }
-    }
-
     public void add(List<FixtureOdds> oddsForFixtures) {
+        //Сollect all possible bet values, e.g.
+        //Match Winner: Home	Draw	Away
         for (FixtureOdds oddsForFixture : oddsForFixtures) {
             for (OddsResponse.Bet bet : oddsForFixture.getBets()) {
 
@@ -54,13 +65,32 @@ public class Header {
             }
         }
 
-        int startIndexH2 = this.initial.size();
-        for (Map.Entry<String, List<String>> entry : allPossibleBetValues.entrySet()) {
-            firstLineHeader.put(entry.getKey(), startIndexH2);
-            for (String value : entry.getValue()) {
-                secondLineHeader.put(Pair.of(entry.getKey(), value), startIndexH2++);
+        OddColumn lastKnownBetColumn = columns.stream()
+                .max(Comparator.comparingInt(OddColumn::getColumnIdx)).get();
+
+        //Firstly start with fixed columns (Match winner etc)
+        columns.stream().filter(OddColumn::isOdd).forEach(oddCol -> {
+            List<String> betValues = allPossibleBetValues.get(oddCol.getName());
+            int colIndex = oddCol.getColumnIdx();
+            for (String betValue : betValues) {
+                secondLineHeader.put(Pair.of(oddCol.getName(), betValue), colIndex++);
             }
-            firstLineHeaderEnd.put(entry.getKey(), startIndexH2);
+            if (colIndex > oddCol.getColumnIdx() + oddCol.getSize()) {
+                System.out.println("!!!! ERROR: Reserved " + oddCol.getSize() + " columns for '" + oddCol.getName() + "', but got more values: " + betValues);
+            }
+        });
+
+        //Now process other bets that are not fixed to columns
+        int startIndexH2 = lastKnownBetColumn.getColumnIdx() + lastKnownBetColumn.getSize();
+        for (Map.Entry<String, List<String>> entry : allPossibleBetValues.entrySet()) {
+            if (columns.stream().noneMatch(column -> column.getName().equals(entry.getKey()))) {
+                firstLineHeader.put(entry.getKey(), startIndexH2);
+                //if column was not already processed
+                for (String value : entry.getValue()) {
+                    secondLineHeader.put(Pair.of(entry.getKey(), value), startIndexH2++);
+                }
+                firstLineHeaderEnd.put(entry.getKey(), startIndexH2);
+            }
         }
     }
 
