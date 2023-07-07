@@ -2,15 +2,20 @@ package org.football.stats.data;
 
 import org.football.stats.dto.FixturesResponse;
 import org.football.stats.dto.OddsResponse;
+import org.football.stats.logic.odds.Header;
+import org.football.stats.logic.odds.OddColumn;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DataHelper {
 
-    public static List<FixtureOdds> getOddsForFixtures(List<FixturesResponse> fixturesResponseList, List<OddsResponse> oddsResponseList, List<String> betNames) {
+    public static List<FixtureOdds> getOddsForFixtures(List<FixturesResponse> fixturesResponseList, List<OddsResponse> oddsResponseList, List<String> extraBetNames) {
+        Set<String> betNames = Header.columns.stream().filter(OddColumn::isOdd).map(OddColumn::getName).collect(Collectors.toSet());
+        betNames.addAll(extraBetNames);
         Set<FixturesResponse.FixtureData> fixtures = fixturesResponseList.stream()
                 .flatMap(fixturesResponse -> fixturesResponse.getResponse().stream())
                 .collect(Collectors.toSet());
