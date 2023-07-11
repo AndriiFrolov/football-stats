@@ -16,21 +16,23 @@ public class LeagueTable {
         res.add(header);
 
         if (standings.isEmpty() || standings.get(0).getResponse().isEmpty()) {
-            throw new RuntimeException("Standings response is empty!");
-        }
-        for (List<StandingsResponse.StandingsEntry> standing : standings.get(0).getResponse().get(0).getLeague().getStandings()) {
-            //Typically it should be just one standing, but for some leagues like MLS - it is 2
-            for (StandingsResponse.StandingsEntry standingsEntry : standing) {
-                List<Object> teamRow = new ArrayList<>();
-                teamRow.add(String.valueOf(standingsEntry.getRank()));
-                teamRow.add(standingsEntry.getTeam().getName());
-                teamRow.add(String.valueOf(standingsEntry.getPoints()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getForGoals()));
-                teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getAgainst()));
-                teamRow.add(standingsEntry.getForm());
-                res.add(teamRow);
+            System.out.println("!!!!API Standings response is empty!!!");
+            res.add(Collections.singletonList("API Standings response was empty. Perhaps no Standings exist?"));
+        } else {
+            for (List<StandingsResponse.StandingsEntry> standing : standings.get(0).getResponse().get(0).getLeague().getStandings()) {
+                //Typically it should be just one standing, but for some leagues like MLS - it is 2
+                for (StandingsResponse.StandingsEntry standingsEntry : standing) {
+                    List<Object> teamRow = new ArrayList<>();
+                    teamRow.add(String.valueOf(standingsEntry.getRank()));
+                    teamRow.add(standingsEntry.getTeam().getName());
+                    teamRow.add(String.valueOf(standingsEntry.getPoints()));
+                    teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getForGoals()));
+                    teamRow.add(String.valueOf(standingsEntry.getAll().getGoals().getAgainst()));
+                    teamRow.add(standingsEntry.getForm());
+                    res.add(teamRow);
+                }
+                res.add(Collections.singletonList("----"));
             }
-            res.add(Collections.singletonList("----"));
         }
         Sheets.write(res, sheet);
     }

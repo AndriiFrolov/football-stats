@@ -3,6 +3,7 @@ package org.football.stats.api;
 import io.restassured.RestAssured;
 import org.football.stats.dto.*;
 import org.football.stats.dto.teams.Teams;
+import org.football.stats.props.PropertiesSupplier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 public class ApiRunner {
+    //For free subscription you can use up to 10 requests per minute
+    //"errors":{"rateLimit":"Too many requests. Your rate limit is 10 requests per minute."},
+    private static int requestsMade = 0;
 
     public static Teams getTeams(String league, String season) {
         return RestAssured.given()
@@ -55,6 +59,17 @@ public class ApiRunner {
         if (page != null) {
             queryParams.put("page", page);
         }
+        int maxRequestsPerMinute = Integer.parseInt(PropertiesSupplier.getProperty("max.number.of.requests.per.minute"));
+        if (requestsMade >= maxRequestsPerMinute - 1) {
+            System.out.println("Already done max number of requests per minute. Waiting 70 seconds before proceeding");
+            try {
+                Thread.sleep(70 * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            requestsMade = 0;
+        }
+        requestsMade++;
         System.out.println("------------------------------------------------------------------------------------------------");
         System.out.printf("Sending request to %s with params: \n", url);
         printMap(queryParams);
