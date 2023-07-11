@@ -70,6 +70,10 @@ public class Main {
     private static void loadSettings() {
         try {
             PropertiesLoader.loadGlobalProperties(Main.class, "settings.properties");
+            Map<String, Object> credentials = new ObjectMapper().readValue(ResourceReader.getResourceAsString("credentials.json"), HashMap.class);
+            if (!credentials.containsKey("installed")) {
+                throw new RuntimeException("Make sure you have filled your credentials.json file. Delete tokens/StoredCredentials file if you want to use new credentials");
+            }
             leaguesJson =
                     new ObjectMapper().readValue(ResourceReader.getResourceAsString("leagues.json"), HashMap.class);
             Map<String, String> bookmakersJson =
